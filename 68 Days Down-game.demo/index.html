@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>68 days down</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="game-wrap">
+<div id="stage">
+    <canvas id="game-canvas" width="1280" height="720"></canvas>
+
+    <!-- 顶部状态 -->
+    <div id="top-bar" class="hidden">
+        <div class="stat-pill"><span class="label">分数</span><span class="value" id="score-val">0</span></div>
+        <div class="stat-pill"><span class="label">关卡</span><span class="value" id="stage-val">1/5</span></div>
+        <div class="stat-pill"><span class="label">波次</span><span class="value" id="wave-val">1/3</span></div>
+        <div class="stat-pill"><span class="label">击杀</span><span class="value" id="kill-val">0</span></div>
+    </div>
+
+    <!-- 活跃效果 -->
+    <div id="effects-bar"></div>
+
+    <!-- ===== 主菜单 ===== -->
+    <div class="overlay" id="start-screen">
+        <div class="title-wrap">
+            <div class="title-art"><span class="t-num">68</span><span class="t-cn">DAYS DOWN</span></div>
+            <div class="title-sub">弹幕卡牌射击 · 三路守卫战</div>
+        </div>
+        <div class="menu-actions">
+            <button class="btn xl" onclick="startAdventure()">开始冒险</button>
+            <button class="btn xl secondary" onclick="startEndless()">无尽模式</button>
+            <button class="btn xl secondary" onclick="openDeckManager()">卡组管理</button>
+            <button class="btn xl secondary" onclick="showMenuScreen('game-help')">游戏说明</button>
+        </div>
+        <img id="menu-logo" src="assets/logo.png" alt="logo" onerror="this.style.display='none'">
+    </div>
+
+    <!-- ===== 无尽模式·选择卡组 ===== -->
+    <div class="overlay hidden" id="endless-select">
+        <div class="menu-header">
+            <h1>♾️ 无尽模式</h1>
+            <span class="menu-sub">选择出战卡组 · 无限波次 · 每5波出现随机BOSS · 冲击最高分</span>
+        </div>
+        <div id="es-list" class="dm-list"></div>
+        <div class="menu-footer">
+            <button class="btn secondary" onclick="showMenuScreen('start-screen')">返回主菜单</button>
+        </div>
+    </div>
+
+    <!-- ===== 游戏说明 ===== -->
+    <div class="overlay hidden" id="game-help">
+        <div class="menu-header">
+            <h1>游戏说明</h1>
+        </div>
+        <div class="controls">
+            <div><span class="key">W / S</span> 或 <span class="key">↑ / ↓</span> — 在上、中、下三路间切换（阿撒托斯可自由飞行）</div>
+            <div><span class="key">1~6</span> 或点击手牌 — 打出卡牌（消耗 SP 费用）</div>
+            <div><span class="key">空格</span> — 暂停</div>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#9999aa"></span>普通（无效果）</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#44dd66"></span>能量（击杀回费）</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#44aaff"></span>抽牌（击杀抽卡）</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#ff5555"></span>精英（高威胁）</div>
+        </div>
+        <p class="menu-note">
+            4名角色（阿撒托斯需通过第4关解锁）· 每人1张专属角色卡 + 自选19张 = 20张牌组<br>
+            击败蓝色（抽牌）敌人抽1张牌 · 手牌上限5 · 守护身后的水晶 · 每关末尾迎战覆盖三路的BOSS
+        </p>
+        <div class="menu-actions">
+            <button class="btn xl" onclick="initTutorial()">🎓 开始教程</button>
+            <button class="btn" onclick="showMenuScreen('start-screen')">返回主菜单</button>
+        </div>
+    </div>
+
+    <!-- ===== 卡组管理 ===== -->
+    <div class="overlay hidden" id="deck-manager">
+        <div class="menu-header">
+            <h1>🃏 我的卡组</h1>
+            <span class="menu-sub" id="dm-deck-count"></span>
+        </div>
+        <div id="dm-list" class="dm-list"></div>
+        <div class="menu-footer">
+            <button class="btn secondary" onclick="showMenuScreen('start-screen')">返回主菜单</button>
+            <button class="btn" onclick="newDeck()">＋ 新建卡组</button>
+        </div>
+    </div>
+
+    <!-- ===== 角色选择（切换模式） ===== -->
+    <div class="overlay hidden" id="char-select">
+        <div class="menu-header">
+            <h1>👤 选择角色</h1>
+            <span class="menu-sub">◀ ▶ 切换角色 · 每名角色自动携带1张专属卡</span>
+        </div>
+        <div id="cs-grid" class="cs-switch-wrap"></div>
+    </div>
+
+    <!-- ===== 牌组构建器 ===== -->
+    <div class="overlay db-overlay hidden" id="deck-builder">
+        <div class="db-header">
+            <h1>🃏 牌组构建器</h1>
+            <div id="db-char-info" class="db-char-info"></div>
+            <div class="db-count-wrap">已选 <b id="db-count">0</b> / 19</div>
+        </div>
+        <div class="db-name-row">
+            <span>卡组名称：</span>
+            <input id="db-name-input" maxlength="12" placeholder="输入卡组名称…">
+        </div>
+        <div class="db-body">
+            <div id="db-card-pool" class="db-card-pool"></div>
+            <div class="db-sidebar">
+                <h3>构成统计</h3>
+                <div id="db-summary" class="db-deck-summary"></div>
+                <h3>牌组明细 <span style="font-size:10px;color:#666">(点击移除)</span></h3>
+                <div id="db-deck-list" class="db-deck-list"></div>
+                <div class="db-side-btns">
+                    <button class="btn mini secondary" onclick="randomBuild()">随机填满</button>
+                    <button class="btn mini secondary" onclick="clearBuild()">清空</button>
+                </div>
+            </div>
+        </div>
+        <div class="db-footer">
+            <button class="btn secondary" onclick="openDeckManager()">取消</button>
+            <button class="btn" id="db-save-btn" onclick="saveDeckBuild()" disabled>保存卡组</button>
+        </div>
+    </div>
+
+    <!-- ===== 关卡选择 ===== -->
+    <div class="overlay hidden" id="stage-select">
+        <div class="menu-header">
+            <h1>🗺️ 选择关卡</h1>
+            <span class="menu-sub">使用左侧卡组出战 · 通关解锁下一关</span>
+        </div>
+        <div id="ss-deck" class="ss-deck"></div>
+        <div id="ss-stages" class="ss-stages"></div>
+        <div class="menu-footer">
+            <button class="btn secondary" onclick="openDeckManager()">更换卡组</button>
+            <button class="btn" onclick="startBattle()">开始战斗 ▶</button>
+        </div>
+    </div>
+
+    <!-- ===== 暂停 ===== -->
+    <div class="overlay hidden" id="pause-screen">
+        <h1>⏸ 暂停</h1>
+        <div style="display:flex;gap:14px">
+            <button class="btn" onclick="togglePause()">继续</button>
+            <button class="btn secondary" onclick="exitStage()">退出关卡</button>
+        </div>
+    </div>
+
+    <!-- ===== 游戏结束 ===== -->
+    <div class="overlay hidden" id="game-over-screen">
+        <h1 style="color:#ff6677">游戏结束</h1>
+        <p id="go-text"></p>
+        <div style="display:flex;gap:14px;margin-top:10px">
+            <button class="btn secondary" onclick="backToMenu()">返回主菜单</button>
+            <button class="btn" onclick="retryStage()">重新挑战</button>
+        </div>
+    </div>
+
+    <!-- ===== 关卡完成 ===== -->
+    <div class="overlay hidden" id="stage-clear-screen">
+        <h1 style="color:#44ff88">关卡完成！</h1>
+        <p id="sc-text"></p>
+        <div style="display:flex;gap:14px;margin-top:10px">
+            <button class="btn secondary" onclick="backToMenu()">返回主菜单</button>
+            <button class="btn" id="sc-next-btn" onclick="nextStage()">进入下一关 ▶</button>
+        </div>
+    </div>
+
+    <!-- ===== 全部通关 ===== -->
+    <div class="overlay hidden" id="victory-screen">
+        <h1 style="color:#ffcc44">👑 通关！</h1>
+        <p id="victory-text"></p>
+        <button class="btn" onclick="backToMenu()">返回主菜单</button>
+    </div>
+
+    <!-- 底部卡牌区（动态栏：hud-bar.png 底图 + 实时数值叠加） -->
+    <div id="bottom-panel" class="hidden">
+        <div id="card-row"></div>
+        <div id="hud-bar">
+            <div class="hud-box hud-hp">
+                <span class="hud-tag tag-hp">HP</span>
+                <span class="hud-num" id="php-val">100/100</span>
+            </div>
+            <div class="hud-box hud-sp">
+                <span class="hud-tag tag-sp">SP</span>
+                <span class="hud-num" id="energy-val">5/12</span>
+            </div>
+            <div class="hud-slots">
+                <span class="hud-slot"></span><span class="hud-slot"></span><span class="hud-slot"></span><span class="hud-slot"></span><span class="hud-slot"></span>
+            </div>
+            <div class="hud-info">
+                <span>卡组剩余: <b id="deck-count">0</b></span>
+                <span>弃牌堆: <b id="discard-count">0</b></span>
+            </div>
+            <div class="hud-box hud-chp">
+                <span class="hud-tag tag-chp">CHP</span>
+                <span class="hud-num" id="chp-val">150/150</span>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- 确认弹窗（自定义替代原生confirm） -->
+<div class="overlay hidden" id="confirm-dialog" style="z-index:200">
+    <div class="confirm-box">
+        <p id="confirm-dialog-text"></p>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:14px">
+            <button class="btn secondary" onclick="closeConfirm(false)">取消</button>
+            <button class="btn" onclick="closeConfirm(true)">确定</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/constants.js"></script>
+<script src="js/assets.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/menus.js"></script>
+<script src="js/game.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
