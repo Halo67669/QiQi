@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Hub · AI工具目录与创作者社区</title>
+<style>
+  :root{
+    --bg:#0a0e16; --panel:#111926; --panel2:#0e1622; --line:#1c2a3d; --line2:#2a3c54;
+    --txt:#e7eef7; --txt2:#a0b2c9; --txt3:#6d809a;
+    --brand:#4f8cff; --brand2:#7b5cff; --green:#25c98b; --orange:#ff9b3d; --red:#ff5d6c; --pink:#ff7eb9;
+    --radius:14px; --shadow:0 10px 34px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(1100px 560px at 82% -12%,rgba(123,92,255,.18),transparent 60%),
+               radial-gradient(900px 480px at -8% 8%,rgba(79,140,255,.13),transparent 55%),var(--bg);
+    color:var(--txt); line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+  button,input,textarea,select{font:inherit;color:inherit}
+  svg{display:block}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#23374f;border-radius:8px}
+  ::-webkit-scrollbar-track{background:transparent}
+
+  .app{display:flex;flex-direction:column;min-height:100vh}
+  header.top{
+    position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;
+    padding:11px 20px;background:rgba(10,14,22,.84);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:.3px}
+  .logo img{height:34px;width:auto;filter:drop-shadow(0 0 12px rgba(79,140,255,.35))}
+  .search-box{flex:1;max-width:480px;position:relative;margin-left:auto}
+  .search-box input{width:100%;padding:9px 14px 9px 36px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);outline:none;transition:.2s}
+  .search-box input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(79,140,255,.14)}
+  .search-box .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.5;width:16px;height:16px}
+  .btn{padding:9px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;transition:.18s;white-space:nowrap;font-weight:600;font-size:14px}
+  .btn:hover:not(:disabled){border-color:var(--brand);transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;box-shadow:0 6px 18px rgba(79,140,255,.3)}
+  .btn.primary:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-2px)}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:6px 12px;font-size:13px;border-radius:8px}
+  .btn.icon{padding:7px 10px;display:inline-flex;align-items:center;gap:5px}
+  .btn.on{color:var(--orange);border-color:rgba(255,155,61,.45)}
+  .btn.liked{color:var(--red);border-color:rgba(255,93,108,.45)}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+  .btn .n{font-size:12px;color:var(--txt3);font-weight:500}
+  .btn.liked .n,.btn.on .n{color:inherit}
+
+  nav.tabs{display:flex;gap:6px;padding:10px 20px 0;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+  .tab{padding:10px 18px;border-radius:10px 10px 0 0;cursor:pointer;font-weight:600;font-size:14px;color:var(--txt3);transition:.18s;border:1px solid transparent;border-bottom:none}
+  .tab:hover{color:var(--txt2);background:var(--panel2)}
+  .tab.on{color:#fff;background:var(--panel);border-color:var(--line)}
+  .tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--brand);margin-right:6px;vertical-align:middle}
+
+  main{flex:1;padding:20px}
+  .page{display:none;max-width:1400px;margin:0 auto;width:100%;animation:fade .22s ease}
+  .page.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .hero{border-radius:20px;padding:32px;margin-bottom:22px;position:relative;overflow:hidden;background:linear-gradient(120deg,rgba(79,140,255,.16),rgba(123,92,255,.13));border:1px solid var(--line)}
+  .hero h1{font-size:29px;line-height:1.3;margin-bottom:10px}
+  .hero h1 span{background:linear-gradient(90deg,var(--brand),var(--brand2),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--txt2);max-width:660px;margin-bottom:18px}
+  .stats{display:flex;gap:24px;flex-wrap:wrap;align-items:center}
+  .stat .n{font-size:23px;font-weight:800}
+  .stat .l{font-size:12.5px;color:var(--txt3)}
+
+  .toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .grow{flex:1}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{padding:6px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);cursor:pointer;font-size:13px;transition:.16s}
+  .chip:hover{border-color:var(--brand)}
+  .chip.on{background:linear-gradient(135deg,var(--brand),var(--brand2));border-color:transparent;color:#fff;font-weight:600}
+
+  .grid{display:grid;gap:16px}
+  .g-cards{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+  .g-tools{grid-template-columns:repeat(auto-fill,minmax(282px,1fr))}
+  .g-posts{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;transition:.2s;display:flex;flex-direction:column}
+  .card:hover{border-color:var(--brand);transform:translateY(-3px);box-shadow:var(--shadow)}
+  .card .h{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+  .av{width:42px;height:42px;border-radius:12px;flex:none;display:grid;place-items:center;font-weight:800;font-size:17px;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+  .av.sm{width:24px;height:24px;border-radius:8px;font-size:11px}
+  .av.lg{width:72px;height:72px;border-radius:20px;font-size:29px}
+  .name{font-weight:700;font-size:15px;margin-bottom:2px}
+  .meta{font-size:12px;color:var(--txt3)}
+  .desc{font-size:13.5px;color:var(--txt2);margin-bottom:12px;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .tag{font-size:11.5px;padding:3px 9px;border-radius:6px;background:rgba(79,140,255,.12);color:#9cc4ff;border:1px solid rgba(79,140,255,.2)}
+  .tag.price{background:rgba(37,201,139,.12);color:#7ee6be;border-color:rgba(37,201,139,.25)}
+  .tag.tool{background:rgba(255,155,61,.11);color:#ffc48a;border-color:rgba(255,155,61,.24)}
+  .tag.prompt{background:rgba(123,92,255,.13);color:#c4b5ff;border-color:rgba(123,92,255,.28)}
+  .card .foot{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--txt3)}
+
+  .catbar{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+  .cat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.2s}
+  .cat:hover{border-color:var(--brand);transform:translateY(-3px)}
+  .cat.on{border-color:var(--brand);background:linear-gradient(135deg,rgba(79,140,255,.16),rgba(123,92,255,.14))}
+  .cat .ic{font-size:24px;margin-bottom:8px}
+  .cat .t{font-weight:700;font-size:15px}
+  .cat .c{font-size:12px;color:var(--txt3);margin-top:3px}
+
+  /* post card */
+  .post{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:.2s;display:flex;flex-direction:column}
+  .post:hover{border-color:var(--brand);transform:translateY(-3px);box-shadow:var(--shadow)}
+  .thumb{height:150px;display:grid;place-items:center;font-size:42px;position:relative;background:linear-gradient(135deg,var(--panel2),#0a1018)}
+  .thumb .badge{position:absolute;top:10px;left:10px;font-size:11px;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.16)}
+  .thumb .type{position:absolute;top:10px;right:10px;font-size:11px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.1);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.14)}
+  .post .body{padding:14px;flex:1;display:flex;flex-direction:column}
+  .post .title{font-weight:700;font-size:15px;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .post .desc{font-size:13px;color:var(--txt2);flex:1;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .post .row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--txt3)}
+  .author{display:flex;align-items:center;gap:6px}
+  .rate{color:var(--orange);font-weight:700}
+  .post .statsrow{display:flex;gap:12px;font-size:12px;color:var(--txt3)}
+  .post .statsrow span{display:inline-flex;align-items:center;gap:3px}
+  .post .statsrow .voted{color:var(--red)}
+  .post .statsrow .saved{color:var(--orange)}
+  .promptline{font-size:12px;color:var(--txt3);border-top:1px dashed var(--line);margin-top:10px;padding-top:9px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .promptline b{color:var(--txt2);font-weight:600}
+
+  .mask{position:fixed;inset:0;background:rgba(3,6,12,.76);backdrop-filter:blur(6px);z-index:100;display:none;place-items:center;padding:20px;overflow:auto}
+  .mask.on{display:grid}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:18px;width:100%;max-width:540px;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.6);animation:pop .22s ease}
+  .modal.lg{max-width:900px}
+  .modal h2{font-size:20px;margin-bottom:4px}
+  .modal .sub{font-size:13px;color:var(--txt3);margin-bottom:20px}
+  @keyframes pop{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--txt2)}
+  .field .hint2{font-size:11.5px;color:var(--txt3);font-weight:400;margin-left:6px}
+  .field input,.field textarea,.field select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);outline:none;transition:.18s}
+  .field textarea{min-height:84px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(79,140,255,.13)}
+  .err{color:var(--red);font-size:13px;margin-top:6px;display:none}
+  .err.on{display:block}
+  .switcher{display:flex;gap:8px;margin-bottom:18px}
+  .switcher .opt{flex:1;text-align:center;padding:9px;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px;border:1px solid var(--line);color:var(--txt3)}
+  .switcher .opt.on{background:linear-gradient(135deg,var(--brand),var(--brand2));border-color:transparent;color:#fff}
+  .modalfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
+  .quote{font-size:12px;color:var(--txt3);background:var(--panel2);padding:12px;border-radius:10px;border:1px solid var(--line);margin-top:14px;line-height:1.7}
+  .quote b{color:var(--txt2)}
+
+  /* detail */
+  .detail-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px}
+  @media(max-width:900px){.detail-grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  .panel h3{font-size:15px;margin-bottom:12px}
+  .stars{display:flex;gap:6px;font-size:26px;cursor:pointer;user-select:none}
+  .stars span{color:#33455e;transition:.15s}
+  .stars span.on{color:var(--orange);transform:scale(1.08)}
+  .empty{text-align:center;color:var(--txt3);padding:40px 20px;font-size:14px}
+  .empty .btn{margin-top:12px}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;background:#1a2537;border:1px solid var(--line);padding:12px 22px;border-radius:999px;font-size:14px;box-shadow:var(--shadow);opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .section-title{font-size:16px;font-weight:800;margin:22px 0 14px;display:flex;align-items:center;gap:8px}
+  .tabs2{display:flex;gap:8px;margin-bottom:16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tabs2 .t{padding:9px 16px;cursor:pointer;font-weight:600;font-size:14px;color:var(--txt3);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tabs2 .t.on{color:#fff;border-bottom-color:var(--brand)}
+  .subpage{display:none}
+  .subpage.on{display:block}
+  .kv{font-size:13px;color:var(--txt2)}
+  .kv b{color:var(--txt3);font-weight:500}
+  .uinfo{display:flex;align-items:center;gap:10px}
+  .uinfo .nm{font-weight:700;font-size:14px}
+  .uinfo .bio{color:var(--txt3);font-size:12.5px}
+  .dropdown{position:relative}
+  .dropdown .menu{position:absolute;right:0;top:calc(100% + 8px);background:var(--panel);border:1px solid var(--line);border-radius:12px;min-width:180px;padding:6px;box-shadow:var(--shadow);display:none;z-index:60}
+  .dropdown.on .menu{display:block}
+  .dropdown .menu a{padding:9px 12px;border-radius:8px;font-size:14px;display:block;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .dropdown .menu a:hover{background:var(--panel2)}
+  .dropdown .menu .sep{border-top:1px solid var(--line);margin:5px 0}
+  .badge-inline{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--txt2)}
+  .copybtn{font-size:11.5px;padding:3px 9px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;color:var(--txt2);transition:.15s}
+  .copybtn:hover{color:#fff;border-color:var(--brand)}
+  .promptbox{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;color:var(--txt2);white-space:pre-wrap;font-family:ui-monospace,Menlo,Consolas,monospace;position:relative}
+  .promptbox .copybtn{position:absolute;top:8px;right:8px}
+  .toolchain{display:flex;flex-wrap:wrap;gap:8px}
+  .toolchip{font-size:12.5px;padding:5px 11px;border-radius:8px;background:rgba(255,155,61,.1);border:1px solid rgba(255,155,61,.25);color:#ffc48a;display:inline-flex;align-items:center;gap:5px}
+  .review{border-top:1px solid var(--line);padding:14px 0}
+  .review .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:10px}
+  .review .who{font-weight:700;font-size:14px}
+  .review .when{font-size:12px;color:var(--txt3);flex:none}
+  .review .txt{font-size:14px;color:var(--txt2);white-space:pre-wrap}
+  .review .acts{display:flex;gap:10px;margin-top:8px;font-size:12px}
+  .review .acts span{cursor:pointer;color:var(--txt3);transition:.15s}
+  .review .acts span:hover{color:var(--txt2)}
+  .replyform{margin-top:10px;display:none}
+  .replyform textarea{width:100%;min-height:60px;padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);resize:vertical;margin-bottom:8px}
+  .replies{margin-left:26px;margin-top:10px;padding-left:14px;border-left:2px solid var(--line)}
+  .replies .review{padding:10px 0}
+  .replies .review:first-child{border-top:none;padding-top:0}
+  .mediaframe{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#000;margin-bottom:16px}
+  .mediaframe img{width:100%;display:block}
+  .mediaframe video,.mediaframe audio{width:100%}
+  .mediaframe .placeholder{height:200px;display:grid;place-items:center;text-align:center;color:var(--txt3);padding:20px}
+  .footline{text-align:center;color:var(--txt3);font-size:12.5px;padding:26px;border-top:1px solid var(--line);margin-top:30px;line-height:1.8}
+  .footline b{color:var(--txt2)}
+  .uploadbox{border:2px dashed var(--line2);border-radius:12px;padding:22px;text-align:center;cursor:pointer;transition:.18s;color:var(--txt3);font-size:13px}
+  .uploadbox:hover{border-color:var(--brand);color:var(--txt2)}
+  .uploadbox .big{font-size:30px;margin-bottom:6px}
+  .filechip{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:5px 11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);margin:5px 6px 0 0}
+  .filechip .x{cursor:pointer;color:var(--txt3);font-weight:800}
+  .filechip .x:hover{color:var(--red)}
+  .cnt{font-size:13px;color:var(--txt3)}
+  .cnt b{color:var(--txt2)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="logo">
+      <img src="logo_cutout.png" alt="AI Hub">
+      <span>AI Hub</span>
+    </div>
+    <div class="search-box">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="globalsearch" type="text" placeholder="搜索工具 / 作品 / 提示词 / 作者…">
+    </div>
+    <div id="autharea"></div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <div class="tab on" data-p="tools"><span class="dot"></span>AI 工具</div>
+    <div class="tab" data-p="community">作品社区</div>
+    <div class="tab" data-p="submit">收录工具</div>
+    <div class="tab" data-p="me">我的</div>
+  </nav>
+
+  <main>
+    <!-- TOOLS -->
+    <section class="page on" id="p-tools">
+      <div class="hero">
+        <h1>一个入口，找全 <span>AI 工具</span>，发布和体验 AI 作品</h1>
+        <p>按能力分类浏览工具目录，在作品社区发布你的 AI 生图、建模、视频、游戏、音乐与写作，带上提示词和工具链，获得真实评价。</p>
+        <div class="stats" id="herostats"></div>
+      </div>
+      <div class="toolbar">
+        <div class="chips" id="toolpricing"></div>
+        <div class="grow"></div>
+        <button class="btn ghost sm" id="clearToolFilter">重置筛选</button>
+      </div>
+      <div class="catbar" id="toolcats"></div>
+      <div class="grid g-tools" id="toolgrid"></div>
+      <div class="empty" id="toolEmpty" style="display:none">没有匹配的工具，换个关键词试试。</div>
+    </section>
+
+    <!-- COMMUNITY -->
+    <section class="page" id="p-community">
+      <div class="bar">
+        <div>
+          <h2 style="font-size:22px;font-weight:800">作品社区</h2>
+          <div class="cnt" id="postcount"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div class="chips" id="sortchips">
+            <div class="chip on" data-s="new">最新</div>
+            <div class="chip" data-s="hot">最热</div>
+            <div class="chip" data-s="top">评分最高</div>
+            <div class="chip" data-s="likes">最多赞</div>
+          </div>
+          <button class="btn primary" id="openUpload">＋ 发布作品</button>
+        </div>
+      </div>
+      <div class="catbar" id="postcats"></div>
+      <div class="grid g-posts" id="postgrid"></div>
+      <div class="empty" id="postEmpty" style="display:none">这个分区还没有作品，来做第一个吧。</div>
+    </section>
+
+    <!-- SUBMIT TOOL -->
+    <section class="page" id="p-submit">
+      <div class="panel" style="max-width:640px;margin:0 auto">
+        <h2>提交 AI 工具收录</h2>
+        <div class="sub">帮大家发现好工具，提交后由管理员审核上架。</div>
+        <div class="field"><label>工具名称</label><input id="s-name" placeholder="例如：Midjourney"></div>
+        <div class="field"><label>网址</label><input id="s-url" placeholder="https://example.com"></div>
+        <div class="field"><label>一句话介绍</label><textarea id="s-desc" placeholder="这个工具能帮你做什么？"></textarea></div>
+        <div class="field"><label>分类</label><select id="s-cat"></select></div>
+        <div class="field"><label>收费模式</label>
+          <select id="s-price"><option value="免费">免费</option><option value="免费增值">免费增值</option><option value="付费">付费</option><option value="开源">开源</option></select></div>
+        <div class="field"><label>标签（逗号分隔）</label><input id="s-tags" placeholder="图像生成, 二次元"></div>
+        <div class="modalfoot"><button class="btn" onclick="showPage('tools')">返回目录</button><button class="btn primary" onclick="submitTool()">提交收录</button></div>
+        <div class="quote"><b>提示：</b>原型数据存在浏览器本地，提交后只有你能看到。正式上线后进入数据库走审核流程。</div>
+      </div>
+    </section>
+
+    <!-- ME -->
+    <section class="page" id="p-me"><div id="meContent"></div></section>
+  </main>
+
+  <div class="footline">
+    <b>AI Hub 原型</b> · 数据保存在本地浏览器，清除浏览数据会丢失 · 原型仅演示产品逻辑，非真实线上服务<br>
+    图片与文件目前以「文件名 + 外链」形式模拟上传；正式上线后将走对象存储 + 审核。
+  </div>
+</div>
+
+<!-- AUTH -->
+<div class="mask" id="maskAuth">
+  <div class="modal">
+    <h2 id="authTitle">登录 / 注册</h2>
+    <div class="sub">原型无需邮箱验证，注册即用，密码仅存本机。</div>
+    <div class="switcher">
+      <div class="opt on" id="swLogin" onclick="switchAuth('login')">登录</div>
+      <div class="opt" id="swReg" onclick="switchAuth('reg')">注册</div>
+    </div>
+    <div class="field"><label>用户名</label><input id="a-user" placeholder="输入用户名"></div>
+    <div class="field"><label>密码</label><input id="a-pass" type="password" placeholder="至少 4 位"></div>
+    <div class="err" id="a-err"></div>
+    <div class="modalfoot"><button class="btn ghost" onclick="closeAuth()">取消</button><button class="btn primary" id="a-submit" onclick="doAuth('login')">登录</button></div>
+    <div class="quote"><b>演示账号：</b>demo / 1234（点此快速体验）</div>
+  </div>
+</div>
+
+<!-- TOOL DETAIL -->
+<div class="mask" id="maskTool">
+  <div class="modal lg">
+    <h2 id="td-name"></h2>
+    <div class="sub" id="td-meta"></div>
+    <div class="tags" id="td-tags"></div>
+    <p id="td-desc" style="color:var(--txt2);margin-bottom:16px"></p>
+    <div class="bar">
+      <div class="uinfo"><div class="av sm" id="td-av"></div><div><div class="nm" id="td-sub"></div><div class="bio" id="td-cat"></div></div></div>
+      <a class="btn primary" id="td-link" target="_blank" rel="noopener">访问官网 ↗</a>
+    </div>
+    <div class="quote"><b>原型：</b>正式版这里会有截图、定价对比、用户评价与替代推荐。</div>
+    <div class="modalfoot"><button class="btn" onclick="closeTool()">关闭</button></div>
+  </div>
+</div>
+
+<!-- POST DETAIL -->
+<div class="mask" id="maskPost">
+  <div class="modal lg" style="max-width:960px">
+    <div class="bar" style="margin-bottom:6px">
+      <div><h2 id="pd-title" style="font-size:22px;margin-bottom:4px"></h2><div class="cnt" id="pd-meta2"></div></div>
+      <button class="btn ghost sm" onclick="closePost()">✕</button>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <div id="pd-media"></div>
+        <div class="panel" style="margin-bottom:16px">
+          <h3>作品说明</h3>
+          <p id="pd-desc" style="color:var(--txt2);white-space:pre-wrap;margin-bottom:14px"></p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="pd-tags"></div>
+          <h3>使用的工具</h3>
+          <div class="toolchain" id="pd-tools"></div>
+        </div>
+        <div class="panel" style="margin-bottom:16px">
+          <h3>提示词</h3>
+          <div class="promptbox"><button class="copybtn" onclick="copyText('pd-prompt', this)">复制</button><span id="pd-prompt"></span></div>
+        </div>
+        <div class="panel">
+          <div class="bar"><h3 style="margin:0">评论 <span class="cnt" id="pd-revcount"></span></h3></div>
+          <div id="pd-reviews"></div>
+          <div id="reviewForm" style="display:none">
+            <div class="field"><label>你的评分</label>
+              <div class="stars" id="pd-stars"><span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div>
+            </div>
+            <div class="field"><label>评论</label><textarea id="pd-comment" placeholder="说说你的真实体验"></textarea></div>
+            <div class="modalfoot"><button class="btn primary" onclick="submitReview()">发表评价</button></div>
+          </div>
+          <div id="reviewPrompt" class="empty" style="padding:20px 0">登录后即可发表评论和评价。</div>
+        </div>
+      </div>
+      <div>
+        <div class="panel" style="margin-bottom:16px">
+          <h3>作者</h3>
+          <div class="uinfo" style="margin-bottom:16px"><div class="av sm" id="pd-av"></div><div><div class="nm" id="pd-author"></div></div></div>
+          <div class="kv" style="margin-bottom:10px"><b>发布时间：</b><span id="pd-time"></span></div>
+          <div class="kv" style="margin-bottom:10px"><b>综合评分：</b><span class="rate" id="pd-score"></span></div>
+          <div class="kv" style="margin-bottom:16px"><b>分区：</b><span id="pd-cat"></span></div>
+          <button class="btn" style="width:100%;margin-bottom:8px" id="pd-experience">立即体验 ↗</button>
+        </div>
+        <div class="panel">
+          <h3>互动</h3>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn icon" id="btnLike" onclick="toggleLike()"><span>❤</span> 点赞 <span class="n" id="nLike"></span></button>
+            <button class="btn icon" id="btnSave" onclick="toggleSave()"><span>☆</span> 收藏 <span class="n" id="nSave"></span></button>
+            <button class="btn icon" onclick="sharePost()"><span>⤴</span> 分享</button>
+          </div>
+          <div class="quote"><b>点赞</b>表达喜欢，<b>收藏</b>存到「我的」，都在个人主页可查。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD -->
+<div class="mask" id="maskUpload">
+  <div class="modal lg">
+    <h2>发布 AI 作品</h2>
+    <div class="sub">填好内容和创作过程，帮助别人复现你的成果。</div>
+    <div class="field"><label>标题</label><input id="u-title" placeholder="给作品起个名字"></div>
+    <div class="field"><label>分区（作品类型）</label><select id="u-cat"></select></div>
+    <div class="field"><label>内容格式</label>
+      <select id="u-format">
+        <option value="image">图片</option><option value="video">视频</option><option value="audio">音乐 / 音频</option>
+        <option value="game">游戏 / 软件</option><option value="text">文本</option><option value="model">3D 模型</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>上传内容文件<span class="hint2">原型中不上传真实二进制，记录文件名并在预览区占位</span></label>
+      <div class="uploadbox" onclick="document.getElementById('u-files').click()">
+        <div class="big">⬆</div>
+        点击选择文件，或把文件拖到这里<br>
+        <span style="font-size:12px">图片 / 视频 / 音频 / 压缩包 / 文档均可，支持多文件</span>
+      </div>
+      <input id="u-files" type="file" multiple style="display:none" onchange="pickFiles(this)">
+      <div id="u-filelist"></div>
+    </div>
+    <div class="field"><label>作品说明</label><textarea id="u-desc" placeholder="做了什么、想表达什么"></textarea></div>
+    <div class="field"><label>提示词<span class="hint2">可附参数、种子、模型版本等</span></label><textarea id="u-prompt" placeholder="把完整提示词贴在这里"></textarea></div>
+    <div class="field"><label>使用的 AI 工具<span class="hint2">逗号分隔</span></label><input id="u-tools" placeholder="例如：Midjourney, Photoshop, 可灵"></div>
+    <div class="field"><label>体验链接<span class="hint2">作品可访问地址，在线预览或下载页</span></label><input id="u-link" placeholder="https://"></div>
+    <div class="err" id="u-err"></div>
+    <div class="modalfoot"><button class="btn ghost" onclick="closeUpload()">取消</button><button class="btn primary" onclick="submitUpload()">发布</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== 配置 ===================== */
+const CATS = {
+  image:  {name:'AI 生图', icon:'🎨', color:'#ff7eb9'},
+  model:  {name:'AI 建模', icon:'🧊', color:'#7b5cff'},
+  video:  {name:'AI 视频', icon:'🎬', color:'#4f8cff'},
+  game:   {name:'AI 游戏', icon:'🎮', color:'#25c98b'},
+  audio:  {name:'AI 音乐', icon:'🎵', color:'#c08bff'},
+  text:   {name:'AI 写作', icon:'✍️', color:'#ff9b3d'},
+  code:   {name:'AI 编程', icon:'💻', color:'#5dd6ff'},
+  office: {name:'AI 办公', icon:'📊', color:'#6ee7c0'},
+};
+const PRICE = ['全部','免费','免费增值','付费','开源'];
+const FORMAT = {
+  image:{label:'图片',icon:'🖼️',ext:/\\.(png|jpe?g|gif|webp|bmp|svg)$/i},
+  video:{label:'视频',icon:'🎬',ext:/\\.(mp4|mov|webm|m4v|avi)$/i},
+  audio:{label:'音乐',icon:'🎵',ext:/\\.(mp3|wav|ogg|flac|aac)$/i},
+  game:{label:'游戏',icon:'🎮',ext:/\\.(zip|rar|7z|exe|apk|unitypackage|html)$/i},
+  text:{label:'文本',icon:'📄',ext:/\\.(txt|md|pdf|docx|epub)$/i},
+  model:{label:'模型',icon:'🧊',ext:/\\.(glb|gltf|obj|fbx|stl|usdz|blend)$/i},
+};
+const ICONS = {
+  image:'🎨',model:'🧊',video:'🎬',game:'🎮',audio:'🎵',text:'✍️',code:'💻',office:'📊',
+};
+
+const SEED_TOOLS = [
+  {name:'Midjourney',cat:'image',price:'付费',tags:['图像生成','写实','二次元'],desc:'Discord 指令驱动的高质量图像生成，擅长艺术化风格与概念设计。',url:'https://www.midjourney.com'},
+  {name:'Stable Diffusion',cat:'image',price:'开源',tags:['图像生成','开源'],desc:'开源图像生成生态，支持本地部署、LoRA 微调与海量插件。',url:'https://stability.ai'},
+  {name:'DALL·E 3',cat:'image',price:'免费增值',tags:['图像生成','海报'],desc:'深度理解自然语言提示词，与 ChatGPT 打通，适合快速出图。',url:'https://openai.com/dall-e-3'},
+  {name:'Tripo 3D',cat:'model',price:'免费增值',tags:['3D建模','材质'],desc:'文字或图片生成带贴图 3D 模型，输出 GLB/FBX 可直接进引擎。',url:'https://www.tripo3d.ai'},
+  {name:'Meshy',cat:'model',price:'免费增值',tags:['3D建模','动画'],desc:'文生/图生 3D，自动贴图与骨骼绑定，导出进 Unity/Blender。',url:'https://www.meshy.ai'},
+  {name:'Runway Gen-3',cat:'video',price:'付费',tags:['文生视频','运镜'],desc:'电影级文生视频与图生视频，支持运动笔刷和镜头控制。',url:'https://runwayml.com'},
+  {name:'可灵 AI',cat:'video',price:'免费增值',tags:['文生视频','图生视频'],desc:'国产高质量视频生成，长时长强运镜，适合短视频与特效。',url:'https://klingai.com'},
+  {name:'Pika',cat:'video',price:'免费增值',tags:['文生视频','特效'],desc:'轻量易用的 AI 视频创作，内置丰富镜头和风格特效。',url:'https://pika.art'},
+  {name:'Rosebud AI',cat:'game',price:'免费增值',tags:['游戏原型','NPC对话'],desc:'自然语言描述玩法即可生成可玩小游戏，含 AI 生成的 NPC 对话。',url:'https://rosebud.ai'},
+  {name:'Unity Muse',cat:'game',price:'付费',tags:['游戏原型','美术','数值'],desc:'Unity 官方 AI 套件，覆盖素材、行为逻辑与编辑器辅助。',url:'https://unity.com/products/unity-muse'},
+  {name:'ChatGPT',cat:'text',price:'免费增值',tags:['长文','文案','翻译','总结'],desc:'通用大模型，覆盖写作、翻译、总结、编程与任务编排。',url:'https://chatgpt.com'},
+  {name:'Claude',cat:'text',price:'免费增值',tags:['长文','剧本'],desc:'长上下文与写作能力强，适合长文、剧本与大规模文档。',url:'https://claude.ai'},
+  {name:'Cursor',cat:'code',price:'免费增值',tags:['代码生成','补全','重构'],desc:'AI 原生代码编辑器，支持多文件编辑与代码库问答。',url:'httpshttps://cursor.com'},
+  {name:'GitHub Copilot',cat:'code',price:'付费',tags:['代码生成','补全'],desc:'深度集成主流 IDE 的 AI 编程助手，实时补全与代码解释。',url:'https://github.com/features/copilot'},
+  {name:'Suno',cat:'audio',price:'免费增值',tags:['音乐生成','配音'],desc:'输入歌词或描述即可生成完整带人声歌曲，支持风格与语种。',url:'https://suno.com'},
+  {name:'ElevenLabs',cat:'audio',price:'免费增值',tags:['配音','语音克隆'],desc:'高拟真 AI 配音与语音克隆，支持多语种与情感控制。',url:'https://elevenlabs.io'},
+  {name:'Gamma',cat:'office',price:'免费增值',tags:['PPT','文档'],desc:'一句话生成可在线演示的 PPT/文档，自动配图排版。',url:'https://gamma.app'},
+  {name:'Notion AI',cat:'office',price:'付费',tags:['总结','会议纪要'],desc:'嵌入 Notion 的 AI 助手，文档起草、总结与知识库问答一体。',url:'https://notion.so/product/ai'},
+  {name:'Perplexity',cat:'office',price:'免费增值',tags:['搜索','总结'],desc:'AI 搜索与答案引擎，引用来源可逐条查看，适合调研选题。',url:'https://www.perplexity.ai'},
+  {name:'RVC',cat:'audio',price:'开源',tags:['语音克隆','开源'],desc:'开源语音转换模型，适合配音与歌声合成，本地可部署。',url:'https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI'},
+];
+
+const SEED_POSTS = [
+  {cat:'image',format:'image',title:'赛博朋克城市概念图（附完整提示词）',desc:'ControlNet 加自训 LoRA，分享构图与提示词思路，可复现。',link:'https://stability.ai',emoji:'🌆',prompt:'cyberpunk cityscape at night, neon reflections on wet streets, cinematic wide angle, volumetric fog, ultra detailed, 8k --ar 16:9 --style raw --s 250',tools:'Stable Diffusion,ControlNet,Photoshop',files:[{name:'cyber_city_v3.png',size:2840000}],score:4.8,likes:128,views:2410,reviews:[
+    {who:'墨白',when:'3 天前',v:5,txt:'氛围感很强，提示词能再详细一点就好了。',likes:4,replies:[]},
+    {who:'Neon',when:'1 周前',v:5,txt:'光影处理很专业，求 LoRA 链接。',likes:2,replies:[]},
+  ]},
+  {cat:'image',format:'image',title:'AI 生成的国风插画角色集（12 个）',desc:'统一风格训练的角色集，附可商用授权说明。',link:'https://stability.ai',emoji:'🎎',prompt:'中国风角色立绘，工笔画风格，柔和配色，全身像，纯白背景',tools:'Midjourney,Clip Studio',files:[{name:'chars.zip',size:18400000}],score:4.6,likes:86,views:1320,reviews:[
+    {who:'小满',when:'2 天前',v:5,txt:'风格非常统一，衣服细节厉害。',likes:1,replies:[]},
+  ]},
+  {cat:'video',format:'video',title:'AI 短片《潮汐》全流程拆解',desc:'可灵生成素材 + Runway 调运镜 + 精剪，含成本与耗时统计。',link:'https://klingai.com',emoji:'🌊',prompt:'海浪拍打礁石慢镜头，逆光，胶片颗粒感，24fps',tools:'可灵 AI,Runway,Premiere',files:[{name:'tide_final.mp4',size:142000000}],score:4.9,likes:210,views:5320,reviews:[
+    {who:'导演阿树',when:'5 小时前',v:5,txt:'这种拆解最有价值，省了很多试错成本。',likes:9,replies:[]},
+    {who:'Kira',when:'2 天前',v:4,txt:'剪辑节奏还有提升空间，但立意很好。',likes:3,replies:[
+      {who:'楼主',when:'1 天前',v:0,txt:'感谢反馈，第二段确实可以再紧凑些。',likes:1,replies:[]},
+    ]},
+    {who:'Leo',when:'4 天前',v:5,txt:'把时间线贴出来就完美了。',likes:0,replies:[]},
+  ]},
+  {cat:'game',format:'game',title:'7 天用 AI 做的 Roguelike 网页小游戏',desc:'美术、音效、文案全部 AI 生成，代码用 Cursor 辅助，可在线玩。',link:'https://rosebud.ai',emoji:'🎮',prompt:'随机地牢 + 回合制卡牌战斗 + 像素风',tools:'Rosebud AI,Cursor,Suno',files:[{name:'roguelike.zip',size:6200000}],score:4.7,likes:156,views:3280,reviews:[
+    {who:'玩家9527',when:'1 天前',v:5,txt:'操作手感意外地不错。',likes:5,replies:[]},
+    {who:'独立开发者',when:'3 天前',v:4,txt:'玩法略单一，但作为 AI 产出已经很强。',likes:2,replies:[]},
+  ]},
+  {cat:'model',format:'model',title:'可直接进 Unity 的 AI 低模角色',desc:'Tripo 生成 + Blender 减面 + 自动绑定，附导出设置。',link:'https://www.tripo3d.ai',emoji:'🧍',prompt:'低多边形风格人形角色，无贴图，三角面数 3000 以内',tools:'Tripo 3D,Blender',files:[{name:'lowpoly_hero.glb',size:980000}],score:4.5,likes:64,views:980,reviews:[
+    {who:'游戏美术老王',when:'6 天前',v:5,txt:'减面参数很有用，亲测可直接用。',likes:6,replies:[]},
+  ]},
+  {cat:'model',format:'model',title:'古建筑构件 3D 素材包（斗拱、瓦当）',desc:'国风场景快速搭建用构件，含多套材质。',link:'https://www.meshy.ai',emoji:'🏯',prompt:'中国古代建筑木构件，写实木质纹理，高细节',tools:'Meshy,Blender',files:[{name:'ancient_pack.zip',size:24100000}],score:4.4,likes:41,views:720,reviews:[],liked:false},
+  {cat:'audio',format:'audio',title:'AI 生成的国风电竞 BGM 合集（10 首）',desc:'10 首可循环 BGM，附商用授权与工程文件。',link:'https://suno.com',emoji:'🎵',prompt:'中国风电子音乐，节奏 128BPM，史诗感，适合电竞比赛',tools:'Suno,ElevenLabs',files:[{name:'bgm_pack.zip',size:56000000}],score:4.3,likes:52,views:860,reviews:[],liked:false},
+  {cat:'text',format:'text',title:'AI 写作：30 天写完一本短篇集的方法',desc:'从选题到成稿的流程与提示词模板，附 3 篇成品。',link:'https://chatgpt.com',emoji:'📖',prompt:'你是一位有十年经验的短篇小说编辑，请按以下结构帮我打磨这篇作品：1.核心冲突 2.人物弧光 3.场景节奏',tools:'ChatGPT,Claude',files:[{name:'short_stories.docx',size:420000}],score:4.6,likes:73,views:1140,reviews:[
+    {who:'写作者小七',when:'4 天前',v:5,txt:'流程很系统，照着做真的能写完。',likes:7,replies:[]},
+  ]},
+  {cat:'audio',format:'audio',title:'AI 配音：用 RVC 克隆自己的声音',desc:'本地部署 RVC，20 句样本就能达到可用效果，附模型参数。',link:'https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI',emoji:'🎙️',prompt:'RVC v2, f0 method harvest, index rate 0.75, pitch -2',tools:'RVC,So-VITS-SVC',files:[{name:'rvc_model.zip',size:320000000}],score:4.2,likes:38,views:640,reviews:[],liked:false},
+];
+
+/* ===================== 状态 ===================== */
+const S = {user:null, tools:[], posts:[], q:'', curToolCat:'all', curToolPrice:'全部', curPostCat:'all', sort:'new', selPost:null, rating:0, pendingFiles:[]};
+const USERS = {list:[{user:'demo',pass:'1234',bio:'演示账号',joined:Date.now()}], session:null};
+const DB = {get(k,f){try{const v=localStorage.getItem('aihub_v2_'+k);return v?JSON.parse(v):f}catch(e){return f}},set(k,v){localStorage.setItem('aihub_v2_'+k,JSON.stringify(v))}};
+
+function init(){
+  S.tools = DB.get('tools',[]); S.posts = DB.get('posts',[]);
+  USERS.list = DB.get('users',USERS.list); USERS.session = DB.get('session',null);
+  if(!S.tools.length){ S.tools = SEED_TOOLS.map((t,i)=>({...t,id:'t'+(i+1),by:'AI Hub',time:Date.now()-i*86400000})); DB.set('tools',S.tools); }
+  if(!S.posts.length){
+    let i=0; S.posts = SEED_POSTS.map(p=>({...p,id:'p'+(++i),by:'社区作者',time:Date.now()-i*172800000,reviews:JSON.parse(JSON.stringify(p.reviews||[])),liked:false,saved:false,views:0,likes:0}));
+    DB.set('posts',S.posts);
+  }
+  if(USERS.session) S.user = USERS.session;
+  buildCats(); buildSelects(); render();
+  document.getElementById('globalsearch').addEventListener('input',e=>{S.q=e.target.value; renderTools(); renderPosts();});
+  // 拖拽上传
+  const ub=document.querySelector('.uploadbox');
+  ub.addEventListener('dragover',e=>{e.preventDefault();ub.style.borderColor='var(--brand)'});
+  ub.addEventListener('dragleave',()=>ub.style.borderColor='');
+  ub.addEventListener('drop',e=>{e.preventDefault();ub.style.borderColor='';pickFiles({files:e.dataTransfer.files})});
+}
+function save(){DB.set('tools',S.tools);DB.set('posts',S.posts);DB.set('users',USERS.list);DB.set('session',USERS.session)}
+
+/* ===================== 渲染 ===================== */
+function buildCats(){
+  const all=Object.keys(CATS);
+  document.getElementById('toolcats').innerHTML=
+    `<div class="cat on" data-c="all"><div class="ic">🧭</div><div class="t">全部分类</div><div class="c">${S.tools.length} 个工具</div></div>`+
+    all.map(c=>`<div class="cat" data-c="${c}"><div class="ic">${CATS[c].icon}</div><div class="t">${CATS[c].name}</div><div class="c">${S.tools.filter(t=>t.cat===c).length} 个</div></div>`).join('');
+  document.getElementById('toolcats').querySelectorAll('.cat').forEach(el=>el.onclick=()=>{
+    document.querySelectorAll('#toolcats .cat').forEach(x=>x.classList.remove('on'));el.classList.add('on');S.curToolCat=el.dataset.c;renderTools();});
+  document.getElementById('postcats').innerHTML=
+    `<div class="cat on" data-c="all"><div class="ic">🌐</div><div class="t">全部作品</div><div class="c">${S.posts.length} 件</div></div>`+
+    all.map(c=>`<div class="cat" data-c="${c}"><div class="ic">${CATS[c].icon}</div><div class="t">${CATS[c].name}</div><div class="c">${S.posts.filter(p=>p.cat===c).length} 件</div></div>`).join('');
+  document.getElementById('postcats').querySelectorAll('.cat').forEach(el=>el.onclick=()=>{
+    document.querySelectorAll('#postcats .cat').forEach(x=>x.classList.remove('on'));el.classList.add('on');S.curPostCat=el.dataset.c;renderPosts();});
+}
+function buildSelects(){
+  const o=Object.keys(CATS).map(c=>`<option value="${c}">${CATS[c].icon} ${CATS[c].name}</option>`).join('');
+  document.getElementById('s-cat').innerHTML=`<option value="">请选择分类</option>`+o;
+  document.getElementById('u-cat').innerHTML=`<option value="">请选择分区</option>`+o;
+}
+function render(){renderAuth();renderHero();renderToolFilters();renderTools();renderPosts();renderMe();}
+function renderAuth(){
+  const b=document.getElementById('autharea');
+  if(S.user){b.innerHTML=`<div class="dropdown" id="dd"><div class="uinfo" style="cursor:pointer" onclick="toggleDD()"><div class="av sm">${S.user[0].toUpperCase()}</div><div class="nm">${S.user}</div></div>
+    <div class="menu"><a onclick="showPage('me');switchMe('posts')">📦 我的作品</a><a onclick="showPage('me');switchMe('saves')">⭐ 我的收藏</a><a onclick="showPage('me');switchMe('likes')">❤️ 我赞过的</a><a onclick="showPage('me');switchMe('reviews')">💬 我的评价</a><div class="sep"></div><a onclick="logout()">退出登录</a></div></div>`;}
+  else b.innerHTML=`<button class="btn" onclick="openAuth('login')">登录</button><button class="btn primary" onclick="openAuth('reg')">注册</button>`;
+}
+function renderHero(){
+  document.getElementById('herostats').innerHTML=
+    `<div class="stat"><div class="n">${S.tools.length}</div><div class="l">收录工具</div></div>
+     <div class="stat"><div class="n">${S.posts.length}</div><div class="l">件 AI 作品</div></div>
+     <div class="stat"><div class="n">${S.posts.reduce((a,p)=>a+p.likes,0)}</div><div class="l">次点赞</div></div>
+     <div class="stat"><div class="n">${S.posts.reduce((a,p)=>a+p.views,0)}</div><div class="l">次体验</div></div>
+     <div class="stat"><div class="n">${S.posts.reduce((a,p)=>a+p.reviews.length,0)}</div><div class="l">条评论</div></div>`;
+}
+function renderToolFilters(){document.getElementById('toolpricing').innerHTML=PRICE.map(p=>`<div class="chip${p==='全部'?' on':''}" onclick="pickPrice(this,'${p}')">${p}</div>`).join('');}
+function pickPrice(el,p){document.querySelectorAll('#toolpricing .chip').forEach(x=>x.classList.remove('on'));el.classList.add('on');S.curToolPrice=p;renderTools();}
+
+function cardHTML(t){
+  return `<div class="card" onclick="openTool('${t.id}')">
+    <div class="h"><div class="av">${t.name[0]}</div><div><div class="name">${t.name}</div><div class="meta">${CATS[t.cat].name}</div></div></div>
+    <div class="desc">${t.desc}</div>
+    <div class="tags"><span class="tag">${CATS[t.cat].name}</span>${t.tags.slice(0,2).map(x=>`<span class="tag">${x}</span>`).join('')}<span class="tag price">${t.price}</span></div>
+    <div class="foot"><span>📎 ${t.by}</span><span>🔗 查看</span></div></div>`;
+}
+function renderTools(){
+  const q=S.q.trim().toLowerCase();
+  const list=S.tools.filter(t=>(S.curToolCat==='all'||t.cat===S.curToolCat)&&(S.curToolPrice==='全部'||t.price===S.curToolPrice)&&(!q||(t.name+t.desc+t.tags.join('')).toLowerCase().includes(q)));
+  document.getElementById('toolgrid').innerHTML=list.map(cardHTML).join('');
+  document.getElementById('toolEmpty').style.display=list.length?'none':'block';
+}
+
+function formatBytes(n){if(!n)return'';const u=['B','KB','MB','GB'];let i=0;let v=n;while(v>=1024&&i<u.length-1){v/=1024;i++}return (i?Math.round(v*10)/10:v)+u[i];}
+function postHTML(p){
+  const fmt=FORMAT[p.format]||FORMAT.image;
+  const liked = p.likedBy && p.likedBy.includes(S.user);
+  const saved = p.savedBy && p.savedBy.includes(S.user);
+  return `<div class="post" onclick="openPost('${p.id}')">
+    <div class="thumb" style="background:linear-gradient(135deg,${CATS[p.cat].color}2e,transparent),var(--panel2)">
+      <span class="badge">${CATS[p.cat].name}</span><span class="type">${fmt.icon} ${fmt.label}</span>
+      <span style="font-size:44px">${p.emoji||ICONS[p.cat]}</span></div>
+    <div class="body"><div class="title">${p.title}</div><div class="desc">${p.desc}</div>
+    ${p.prompt?`<div class="promptline"><b>提示词：</b>${esc(p.prompt.slice(0,60))}${p.prompt.length>60?'…':''}</div>`:''}
+    ${p.tools?`<div class="tags" style="margin:10px 0 0">${p.tools.split(/[,，]/).map(x=>`<span class="tag tool">${x.trim()}</span>`).slice(0,3).join('')}</div>`:''}
+    <div class="row" style="margin-top:12px"><span class="author"><span class="av sm">${p.by[0].toUpperCase()}</span>${p.by}</span></div>
+    <div class="statsrow"><span class="${liked?'voted':''}" onclick="event.stopPropagation();quickLike('${p.id}')">❤ ${p.likes}</span><span>⭐ ${p.score.toFixed(1)}</span><span>💬 ${p.reviews.length}</span><span class="${saved?'saved':''}">☆ ${p.savedBy?p.savedBy.length:0}</span></div></div></div>`;
+}
+function renderPosts(){
+  const q=S.q.trim().toLowerCase();
+  let list=S.posts.filter(p=>(S.curPostCat==='all'||p.cat===S.curPostCat)&&(!q||(p.title+p.desc+p.by+(p.prompt||'')+(p.tools||'')).toLowerCase().includes(q)));
+  list.sort((a,b)=>S.sort==='hot'?b.views-a.views:S.sort==='top'?b.score-a.score:S.sort==='likes'?b.likes-a.likes:b.time-a.time);
+  document.getElementById('postgrid').innerHTML=list.map(postHTML).join('');
+  document.getElementById('postcount').innerHTML=`共 <b>${list.length}</b> 件作品 · <b>${list.reduce((a,p)=>a+p.reviews.length,0)}</b> 条评论 · <b>${list.reduce((a,p)=>a+p.likes,0)}</b> 次点赞`;
+  document.getElementById('postEmpty').style.display=list.length?'none':'block';
+}
+function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+
+function renderMe(){
+  const c=document.getElementById('meContent');
+  if(!S.user){c.innerHTML=`<div class="panel" style="max-width:520px;margin:40px auto;text-align:center"><div style="font-size:44px">🔐</div><h2 style="margin:10px 0">登录后查看你的主页</h2><p style="color:var(--txt3)">管理你的作品、收藏、点赞与评论。</p><button class="btn primary" style="margin-top:16px" onclick="openAuth('login')">登录 / 注册</button></div>`;return;}
+  c.innerHTML=`<div class="profile-head"><div class="av lg">${S.user[0].toUpperCase()}</div><div><div class="name">${S.user}</div><div class="bio">加入于 ${new Date(USERS.list.find(u=>u.user===S.user).joined).toLocaleDateString()}</div></div>
+    <div style="flex:1"></div><button class="btn primary" onclick="openUpload()">＋ 发布作品</button></div>
+    <div class="tabs2"><div class="t on" onclick="switchMe('posts')">我的作品</div><div class="t" onclick="switchMe('saves')">我的收藏</div><div class="t" onclick="switchMe('likes')">我赞过的</div><div class="t" onclick="switchMe('reviews')">我的评价</div><div class="t" onclick="switchMe('tools')">我的工具</div></div>
+    <div class="subpage on" id="me-posts"></div><div class="subpage" id="me-saves"></div><div class="subpage" id="me-likes"></div><div class="subpage" id="me-reviews"></div><div class="subpage" id="me-tools"></div>`;
+  switchMe('posts');
+}
+function switchMe(tab){
+  document.querySelectorAll('.tabs2 .t').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.subpage').forEach(x=>x.classList.remove('on'));
+  document.querySelector(`.tabs2 .t[onclick="switchMe('${tab}')"]`).classList.add('on');
+  document.getElementById('me-'+tab).classList.add('on');
+  if(tab==='posts'){
+    const mine=S.posts.filter(p=>p.by===S.user);
+    document.getElementById('me-posts').innerHTML=mine.length?`<div class="grid g-posts">${mine.map(postHTML).join('')}</div>`:`<div class="empty">还没有发布作品。<button class="btn sm" onclick="openUpload()">去发布第一件</button></div>`;
+  } else if(tab==='saves'){
+    const a=S.posts.filter(p=>p.savedBy&&p.savedBy.includes(S.user));
+    document.getElementById('me-saves').innerHTML=a.length?`<div class="grid g-posts">${a.map(postHTML).join('')}</div>`:`<div class="empty">还没有收藏作品。<button class="btn sm" onclick="showPage('community')">去逛逛</button></div>`;
+  } else if(tab==='likes'){
+    const a=S.posts.filter(p=>p.likedBy&&p.likedBy.includes(S.user));
+    document.getElementById('me-likes').innerHTML=a.length?`<div class="grid g-posts">${a.map(postHTML).join('')}</div>`:`<div class="empty">还没有点赞过作品。</div>`;
+  } else if(tab==='reviews'){
+    const a=[];S.posts.forEach(p=>p.reviews.filter(r=>r.who===S.user).forEach(r=>a.push({...r,pid:p.id,pt:p.title})));
+    document.getElementById('me-reviews').innerHTML=a.length?a.map(r=>`<div class="review"><div class="top"><div><span class="who">${r.pt}</span> <span class="rate">${'★'.repeat(r.v)}${'☆'.repeat(5-r.v)}</span></div><div class="when">${r.when}</div></div><div class="txt">${esc(r.txt)}</div></div>`).join(''):`<div class="empty">还没有发表过评价。</div>`;
+  } else {
+    document.getElementById('me-tools').innerHTML=`<div class="empty">这里会显示你提交收录的工具。<button class="btn sm" onclick="showPage('submit')">去提交一个</button></div>`;
+  }
+}
+
+/* ===================== 页面切换 ===================== */
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  document.getElementById('p-'+p).classList.add('on');
+  document.querySelectorAll('.tabs .tab').forEach(x=>x.classList.toggle('on',x.dataset.p===p));
+  window.scrollTo({top:0,behavior:'smooth'});render();
+}
+document.querySelectorAll('.tabs .tab').forEach(t=>t.onclick=()=>showPage(t.dataset.p));
+document.querySelectorAll('#sortchips .chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('#sortchips .chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');S.sort=c.dataset.s;renderPosts();});
+document.getElementById('clearToolFilter').onclick=()=>{S.curToolCat='all';S.curToolPrice='全部';S.q='';document.getElementById('globalsearch').value='';buildCats();renderToolFilters();renderTools();};
+
+/* ===================== 认证 ===================== */
+function openAuth(mode){switchAuth(mode||'login');document.getElementById('maskAuth').classList.add('on');}
+function closeAuth(){document.getElementById('maskAuth').classList.remove('on');document.getElementById('a-err').classList.remove('on');}
+function switchAuth(m){
+  document.getElementById('swLogin').classList.toggle('on',m==='login');document.getElementById('swReg').classList.toggle('on',m==='reg');
+  document.getElementById('authTitle').textContent=m==='login'?'登录':'注册新账号';
+  document.getElementById('a-submit').textContent=m==='login'?'登录':'注册';
+  document.getElementById('a-submit').onclick=()=>doAuth(m);document.getElementById('a-err').classList.remove('on');
+}
+function doAuth(mode){
+  const u=document.getElementById('a-user').value.trim(),p=document.getElementById('a-pass').value,e=document.getElementById('a-err');
+  if(!u||!p){e.textContent='用户名和密码都要填';e.classList.add('on');return;}
+  if(mode==='reg'){
+    if(p.length<4){e.textContent='密码至少 4 位';e.classList.add('on');return;}
+    if(USERS.list.some(x=>x.user===u)){e.textContent='这个用户名已经被注册了';e.classList.add('on');return;}
+    USERS.list.push({user:u,pass:p,bio:'',joined:Date.now()});
+  } else {
+    if(!USERS.list.some(x=>x.user===u&&x.pass===p)){e.textContent='用户名或密码错误';e.classList.add('on');return;}
+  }
+  S.user=u;USERS.session=u;save();render();closeAuth();toast(mode==='reg'?'注册成功，欢迎加入 🎉':'登录成功，欢迎回来');
+}
+function logout(){S.user=null;USERS.session=null;save();render();showPage('tools');toast('已退出登录');}
+function toggleDD(){document.getElementById('dd').classList.toggle('on')}
+document.addEventListener('click',e=>{const d=document.getElementById('dd');if(d&&!d.contains(e.target))d.classList.remove('on')});
+
+/* ===================== 工具详情 ===================== */
+function openTool(id){const t=S.tools.find(x=>x.id===id);if(!t)return;
+  document.getElementById('td-name').textContent=t.name;
+  document.getElementById('td-meta').textContent=`${CATS[t.cat].name} · ${t.price} · 由 ${t.by} 收录`;
+  document.getElementById('td-tags').innerHTML=[CATS[t.cat].name,...t.tags].map(x=>`<span class="tag">${x}</span>`).join('');
+  document.getElementById('td-desc').textContent=t.desc;
+  document.getElementById('td-av').textContent=t.name[0];document.getElementById('td-sub').textContent=t.name;document.getElementById('td-cat').textContent=CATS[t.cat].name;
+  document.getElementById('td-link').href=t.url;document.getElementById('maskTool').classList.add('on');}
+function closeTool(){document.getElementById('maskTool').classList.remove('on')}
+
+/* ===================== 作品详情 ===================== */
+function openPost(id){const p=S.posts.find(x=>x.id===id);if(!p)return;
+  S.selPost=p;p.views++;save();
+  document.getElementById('pd-title').textContent=p.title;
+  document.getElementById('pd-meta2').innerHTML=`<span class="badge-inline">${CATS[p.cat].name}</span> · <span class="badge-inline">${FORMAT[p.format].icon} ${FORMAT[p.format].label}</span>`;
+  document.getElementById('pd-desc').textContent=p.desc;
+  document.getElementById('pd-author').textContent=p.by;document.getElementById('pd-av').textContent=p.by[0].toUpperCase();
+  document.getElementById('pd-time').textContent=new Date(p.time).toLocaleDateString();
+  document.getElementById('pd-score').textContent=`${p.score.toFixed(1)} / 5.0（${p.reviews.length} 条）`;
+  document.getElementById('pd-cat').textContent=CATS[p.cat].name;
+  document.getElementById('pd-experience').onclick=()=>p.link?window.open(p.link,'_blank','noopener'):toast('作者还没填体验链接');
+  document.getElementById('pd-revcount').textContent=p.reviews.length;
+  document.getElementById('pd-tags').innerHTML=p.tools?p.tools.split(/[,，]/).map(x=>`<span class="tag tool">${x.trim()}</span>`).join(''):'';
+  document.getElementById('pd-tools').innerHTML=p.tools?p.tools.split(/[,，]/).map(x=>`<span class="toolchip">🔧 ${x.trim()}</span>`).join(''):'<span class="cnt">作者未填写</span>';
+  document.getElementById('pd-prompt').textContent=p.prompt||'作者未公开提示词';
+  renderMedia(p);renderReviews();renderInteract();
+  document.getElementById('reviewForm').style.display=S.user?'block':'none';
+  document.getElementById('reviewPrompt').style.display=S.user?'none':'block';
+  S.rating=0;document.querySelectorAll('#pd-stars span').forEach(s=>s.classList.remove('on'));
+  document.getElementById('pd-comment').value='';
+  document.getElementById('maskPost').classList.add('on');renderPosts();renderHero();
+}
+function renderMedia(p){
+  const box=document.getElementById('pd-media');const f=(p.files&&p.files[0])||{};
+  if(p.format==='image'&&f.name){box.innerHTML=`<div class="mediaframe"><img src="logo_preview_dark.png" alt="作品预览" onerror="this.style.display='none'"></div>`;
+    box.innerHTML=`<div class="mediaframe"><div class="placeholder">🖼️ 图片预览区<br><span style="font-size:12px">${esc(f.name)} ${formatBytes(f.size)}<br>正式版将直接展示图片</span></div></div>`;}
+  else if(p.format==='video')box.innerHTML=`<div class="mediaframe"><div class="placeholder">🎬 视频播放器<br><span style="font-size:12px">${(f.name||'')+' '+formatBytes(f.size)}<br>正式版将内嵌播放器</span></div></div>`;
+  else if(p.format==='audio')box.innerHTML=`<div class="mediaframe"><div class="placeholder">🎵 音频播放器<br><span style="font-size:12px">${(f.name||'')+' '+formatBytes(f.size)}<br>正式版将内嵌播放器</span></div></div>`;
+  else if(p.format==='game')box.innerHTML=`<div class="mediaframe"><div class="placeholder">🎮 游戏 / 软件<br><span style="font-size:12px">${(f.name||'')+' '+formatBytes(f.size)}<br><button class="btn sm" style="margin-top:10px" onclick="toast('正式版将支持在线试玩与下载')">▶ 在线体验 / 下载</button></span></div></div>`;
+  else if(p.format==='text')box.innerHTML=`<div class="mediaframe"><div class="placeholder">📄 文本作品<br><span style="font-size:12px">${(f.name||'')+' '+formatBytes(f.size)}<br><button class="btn sm" style="margin-top:10px" onclick="toast('正式版将支持在线阅读与下载')">📖 在线阅读</button></span></div></div>`;
+  else if(p.format==='model')box.innerHTML=`<div class="mediaframe"><div class="placeholder">🧊 3D 模型预览<br><span style="font-size:12px">${(f.name||'')+' '+formatBytes(f.size)}<br><button class="btn sm" style="margin-top:10px" onclick="toast('正式版将支持 3D 在线预览')">🧊 查看 3D</button></span></div></div>`;
+}
+function renderInteract(){
+  const p=S.selPost;
+  const liked=p.likedBy&&p.likedBy.includes(S.user),saved=p.savedBy&&p.savedBy.includes(S.user);
+  const lb=document.getElementById('btnLike');lb.classList.toggle('liked',!!liked);lb.querySelector('span').textContent=liked?'❤':'❤';lb.querySelector('.n').textContent=p.likes;
+  const sb=document.getElementById('btnSave');sb.classList.toggle('on',!!saved);sb.querySelector('span').textContent=saved?'★':'☆';
+  document.getElementById('nSave').textContent=p.savedBy?p.savedBy.length:0;
+  lb.disabled=!S.user;sb.disabled=!S.user;
+}
+function toggleLike(){
+  if(!S.user){toast('请先登录');openAuth('login');return;}
+  const p=S.selPost,i=p.likedBy||(p.likedBy=[]),k=i.indexOf(S.user);
+  if(k>-1){i.splice(k,1);p.likes--;toast('已取消点赞')}else{i.push(S.user);p.likes++;toast('点赞成功 ❤️')}
+  save();renderInteract();renderPosts();renderHero();renderMe();
+}
+function toggleSave(){
+  if(!S.user){toast('请先登录');openAuth('login');return;}
+  const p=S.selPost,i=p.savedBy||(p.savedBy=[]),k=i.indexOf(S.user);
+  if(k>-1){i.splice(k,1);toast('已取消收藏')}else{i.push(S.user);toast('已收藏到「我的」 ⭐')}
+  save();renderInteract();renderPosts();renderMe();
+}
+function quickLike(id){const p=S.posts.find(x=>x.id===id);if(!p)return;S.selPost=p;toggleLike();}
+function sharePost(){
+  const p=S.selPost;
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(location.href.split('#')[0]+'#'+p.id).then(()=>toast('链接已复制，去分享吧 🔗'),()=>toast('分享：把链接发给朋友即可'));
+  } else toast('分享：把链接发给朋友即可');
+}
+function closePost(){document.getElementById('maskPost').classList.remove('on')}
+
+/* ===================== 评论（含嵌套回复 + 点赞） ===================== */
+function renderReviews(){
+  const p=S.selPost,box=document.getElementById('pd-reviews');
+  box.innerHTML=p.reviews.length?p.reviews.slice().sort((a,b)=>(b.likes||0)-((a.likes||0))).map((r,i)=>reviewHTML(r,i,0)).join('')
+    :`<div class="empty">还没有评价，来当第一个吧。</div>`;
+}
+function reviewHTML(r,idx,depth){
+  const liked=r.likedBy&&r.likedBy.includes(S.user);
+  let h=`<div class="review"${depth?'':' data-idx="'+idx+'"'}>
+    <div class="top"><div><span class="av sm" style="display:inline-grid;vertical-align:middle;margin-right:6px">${r.who[0].toUpperCase()}</span><span class="who">${esc(r.who)}</span> ${r.v?'<span class="rate">'+'★'.repeat(r.v)+'☆'.repeat(5-r.v)+'</span>':''}</div><div class="when">${r.when}</div></div>
+    <div class="txt">${esc(r.txt)}</div>
+    <div class="acts"><span class="${liked?'voted':''}" onclick="likeReview(${idx},${depth},this)">❤ <span>${r.likes||0}</span></span><span onclick="replyTo(${idx})">💬 回复</span></div>
+    <div class="replyform" data-rid="${idx}"><textarea placeholder="回复 ${esc(r.who)}"></textarea><div class="modalfoot"><button class="btn sm" onclick="cancelReply(this)">取消</button><button class="btn sm primary" onclick="sendReply(this,${idx})">回复</button></div></div>`;
+  if(r.replies&&r.replies.length){h+=`<div class="replies">${r.replies.map(r2=>reviewHTML(r2,idx,1)).join('')}</div>`}
+  h+=`</div>`;return h;
+}
+function likeReview(idx,depth,el){
+  if(!S.user){toast('请先登录');openAuth('login');return;}
+  const r=findReview(S.selPost,idx,depth);
+  const i=r.likedBy||(r.likedBy=[]),k=i.indexOf(S.user);
+  if(k>-1){i.splice(k,1);r.likes--}else{i.push(S.user);r.likes++}
+  save();renderReviews();renderPosts();renderMe();
+}
+function findReview(p,idx,depth){return depth?p.reviews[0].replies[idx]:p.reviews[idx];}
+function replyTo(idx){document.querySelectorAll('.replyform').forEach(f=>f.style.display='none');
+  const f=document.querySelector(`.review[data-idx="${idx}"] .replyform`);
+  if(f)f.style.display='block',f.querySelector('textarea').focus();}
+function cancelReply(el){el.closest('.replyform').style.display='none';}
+function sendReply(el,idx){
+  const ta=el.closest('.replyform').querySelector('textarea');const t=ta.value.trim();
+  if(!t){toast('回复内容不能为空');return;}
+  const r=S.selPost.reviews[idx];(r.replies||(r.replies=[])).push({who:S.user,when:'刚刚',v:0,txt:t,likes:0,replies:[]});
+  save();renderReviews();renderPosts();renderMe();toast('回复成功 💬');
+}
+document.querySelectorAll('#pd-stars span').forEach(s=>s.onclick=()=>{S.rating=+s.dataset.v;document.querySelectorAll('#pd-stars span').forEach(x=>x.classList.toggle('on',+x.dataset.v<=S.rating))});
+function submitReview(){
+  const t=document.getElementById('pd-comment').value.trim();
+  if(!S.rating){toast('先点星星打个分');return;}if(!t){toast('说两句吧');return;}
+  S.selPost.reviews.push({who:S.user,when:'刚刚',v:S.rating,txt:t,likes:0,replies:[]});
+  S.selPost.score=S.selPost.reviews.reduce((a,r)=>a+r.v,0)/S.selPost.reviews.length;
+  save();renderReviews();document.getElementById('pd-score').textContent=`${S.selPost.score.toFixed(1)} / 5.0（${S.selPost.reviews.length} 条）`;
+  S.rating=0;document.querySelectorAll('#pd-stars span').forEach(x=>x.classList.remove('on'));document.getElementById('pd-comment').value='';
+  document.getElementById('pd-revcount').textContent=S.selPost.reviews.length;renderPosts();renderHero();renderMe();toast('评价已发布 🎉');
+}
+
+/* ===================== 上传 ===================== */
+function openUpload(){
+  if(!S.user){openAuth('login');toast('请先登录再发布作品');return;}
+  document.getElementById('u-err').classList.remove('on');
+  ['u-title','u-desc','u-prompt','u-tools','u-link'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('u-files').value='';S.pendingFiles=[];renderFiles();
+  document.getElementById('maskUpload').classList.add('on');
+}
+function closeUpload(){document.getElementById('maskUpload').classList.remove('on')}
+function pickFiles(inp){
+  const fs=inp.files?Array.from(inp.files):[];
+  fs.forEach(f=>S.pendingFiles.push({name:f.name,size:f.size}));
+  renderFiles();
+}
+function removeFile(i){S.pendingFiles.splice(i,1);renderFiles();}
+function renderFiles(){
+  document.getElementById('u-filelist').innerHTML=S.pendingFiles.map((f,i)=>`<span class="filechip">📎 ${esc(f.name)} ${formatBytes(f.size)} <span class="x" onclick="removeFile(${i})">×</span></span>`).join('');
+}
+function submitUpload(){
+  const title=document.getElementById('u-title').value.trim(),cat=document.getElementById('u-cat').value,
+        format=document.getElementById('u-format').value,desc=document.getElementById('u-desc').value.trim(),
+        prompt=document.getElementById('u-prompt').value.trim(),tools=document.getElementById('u-tools').value.trim(),
+        link=document.getElementById('u-link').value.trim(),e=document.getElementById('u-err');
+  if(!title||!cat||!desc){e.textContent='标题、分区、作品说明都要填';e.classList.add('on');return;}
+  if(link&&!/^https?:\/\//i.test(link)){e.textContent='体验链接需要以 http:// 或 https:// 开头';e.classList.add('on');return;}
+  S.posts.unshift({id:'p'+Date.now(),cat,format,title,desc,link,prompt,tools,files:S.pendingFiles.slice(),by:S.user,time:Date.now(),likes:0,views:0,score:0,reviews:[],liked:false,likedBy:[],savedBy:[]});
+  save();S.pendingFiles=[];closeUpload();render();showPage('community');toast('发布成功，作品已上线 🚀');
+}
+
+/* ===================== 工具提交 ===================== */
+function submitTool(){
+  const name=document.getElementById('s-name').value.trim(),url=document.getElementById('s-url').value.trim(),
+        desc=document.getElementById('s-desc').value.trim(),cat=document.getElementById('s-cat').value,
+        price=document.getElementById('s-price').value,tags=document.getElementById('s-tags').value;
+  if(!name||!url||!desc||!cat){toast('名称、网址、介绍、分类都要填');return;}
+  if(!/^https?:\/\//i.test(url)){toast('网址要以 http:// 或 https:// 开头');return;}
+  S.tools.unshift({id:'t'+Date.now(),name,url,desc,cat,price,tags:tags.split(/[,，]/).map(x=>x.trim()).filter(Boolean),by:'我',time:Date.now()});
+  save();render();showPage('tools');['s-name','s-url','s-desc','s-tags'].forEach(id=>document.getElementById(id).value='');toast('提交成功，感谢你的贡献 🎉');
+}
+
+/* ===================== 工具函数 ===================== */
+function copyText(id,btn){
+  const t=document.getElementById(id).textContent;
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(()=>{btn.textContent='已复制 ✓';setTimeout(()=>btn.textContent='复制',1600)},()=>toast('复制失败，请手动选取'));}
+  else{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');btn.textContent='已复制 ✓';setTimeout(()=>btn.textContent='复制',1600)}catch(e){toast('复制失败，请手动选取')}document.body.removeChild(ta);}
+}
+let toastTimer;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('on'),2200)}
+document.querySelectorAll('.mask').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on')}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mask.on').forEach(m=>m.classList.remove('on'))});
+init();
+</script>
+</body>
+</html>
